@@ -1,0 +1,6 @@
+- name: Install required software ot the server and create pki
+# ========================================================
+  hosts: VPNserver
+  become: true
+  roles:
+    - setupopenvpnserver

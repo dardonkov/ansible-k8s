@@ -1,0 +1,12 @@
+- name: OpenVPN | package | Ensure the APT cache is up to date
+  apt:
+    update_cache: yes
+  changed_when: False
+
+- name: "Installing openvpn pkg and extra packages"
+  apt: 
+    pkg: 
+    - openvpn
+    - apt-transport-https
+    - ca-certificates
+    state: present

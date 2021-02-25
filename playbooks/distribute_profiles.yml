@@ -1,0 +1,6 @@
+- name: Distribute client profiles
+# ========================================================
+  hosts: k8sworkers
+  become: true
+  roles:
+    - distribute_profiles

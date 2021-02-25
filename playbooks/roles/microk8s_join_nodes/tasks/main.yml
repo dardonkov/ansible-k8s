@@ -1,0 +1,6 @@
+- name: microk8s | Include saved vars from the control plane node
+  include_vars:
+    dir: "{{ inventory_dir }}/host_vars/"
+    
+- name: microk8s setup | Join up all nodes
+  command: "{{microk8s_join_command}}"

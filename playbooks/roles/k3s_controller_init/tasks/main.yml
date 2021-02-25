@@ -1,0 +1,28 @@
+- name: k3s install | Install server
+  shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --disable traefik --flannel-iface  tun-udp-1194" sh -
+  register: installer_output
+
+- name: k3s install | Echo output
+  debug: 
+    msg: "{{ installer_output.stdout }}"
+
+- name: k3s setup | Get join token
+  command: "cat /var/lib/rancher/k3s/server/node-token"
+  register: node_token
+
+- name: k3s setup | Get join token
+  set_fact:
+    k3s_join_token: "{{ node_token.stdout }}"
+
+- name: k3s | Save join token
+  local_action: 
+    module: lineinfile
+    line: "k3s_join_token: {{ k3s_join_token }}"
+    path: "{{ inventory_dir }}/host_vars/{{ inventory_hostname }}.yml"
+    create: true
+
+- name: k3s setup | Copy admin config
+  fetch:
+    src: "/etc/rancher/k3s/k3s.yaml"
+    dest: "{{ local_creds_folder }}/{{inventory_hostname }}/"
+

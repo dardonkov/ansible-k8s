@@ -1,0 +1,51 @@
+- name: K8s | Initialize control plane | kubeadm
+  command: kubeadm init --apiserver-advertise-address={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} --pod-network-cidr={{ k8s_podsnetwork }} --control-plane-endpoint={{ cluster_endpoint }}
+  register: kubeadm_init
+
+- name: K8s | Initialize control plane | Get kubeadm init join command
+  set_fact:
+    kubeadm_join_command1: "{{ kubeadm_init.stdout | regex_search('kubeadm join .* ') }}"
+- name: K8s | Initialize control plane | Get kubeadm init join command
+  set_fact:
+    kubeadm_join_command2: "{{ kubeadm_init.stdout | regex_search('--discovery-token-ca-cert-hash.*') }}"
+
+- name: K8s | Initialize control plane | Get kubeadm init join command
+  set_fact: 
+    kubeadm_join_command: "{{kubeadm_join_command1}} {{kubeadm_join_command2}}"
+
+
+- name: K8s | Initialize control plane | Save kubeadm init join command
+  local_action: 
+    module: lineinfile
+    line: "kubeadm_join_command: {{ kubeadm_join_command }}"
+    path: "{{ inventory_dir }}/host_vars/{{inventory_hostname }}.yml"
+    create: true
+
+- name: K8s | Initialize control plane | Save internal IP of control plane 
+  local_action: 
+    module: lineinfile
+    line: "control_plane_ip: {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+    path: "{{ inventory_dir }}/host_vars/{{inventory_hostname }}.yml"
+    create: true
+
+- name: K8s | Initialize control plane | Get kubectl administrator config file
+  fetch: 
+    src: "/etc/kubernetes/admin.conf"
+    dest: "{{ local_creds_folder }}/{{ inventory_hostname }}/"
+
+- name: K8s | Initialize control plane | Copy kubectl administrator config file to be usable 1/2
+  file:
+    path: "$HOME/.kube"
+    state: directory
+
+- name: K8s | Initialize control plane | Copy kubectl administrator config file to be usable 2/2
+  file:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "$HOME/.kube/config"
+    state: link
+    mode: "0700"
+    owner: root
+    group: root  
+    
+- name: K8s | Initialize control plane | Install a pod network add-on or CNI | Flannel
+  command: "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"

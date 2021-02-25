@@ -1,0 +1,7 @@
+- name: Join up the selected nodes to the cluster
+# ========================================================
+#  hosts: k8scluster
+  hosts: k8s-worker4
+  become: true
+  roles:
+    - k8s_join_node

@@ -1,0 +1,27 @@
+- name: Install required software on clients
+# ========================================================
+  hosts: k8sworkers
+  become: true
+  roles:
+    - setupopenvpnclients
+
+- name: Install required software ot the server and create PKI
+# ========================================================
+  hosts: VPNserver
+  become: true
+  roles:
+    - setupopenvpnserver
+
+- name: Sync desired valid clients with OpenVPN's current PKI
+# ========================================================
+  hosts: VPNserver
+  become: true
+  roles:
+    - sync_clients
+
+- name: Distribute client profiles
+# ========================================================
+  hosts: k8sworkers
+  become: true
+  roles:
+    - distribute_profiles

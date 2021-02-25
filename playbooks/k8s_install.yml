@@ -1,0 +1,7 @@
+- name: Install k8s and prerequisites 
+# ========================================================
+#  hosts: k8scluster
+  hosts: k8scluster
+  become: true
+  roles:
+    - k8s_install

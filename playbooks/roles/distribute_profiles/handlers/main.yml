@@ -1,0 +1,20 @@
+---
+- name: clear history
+  shell: cat /dev/null > ~/.bash_history && history -c
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: edit openvpn service
+  lineinfile:
+    path: /lib/systemd/system/openvpn@.service
+    regexp: '^ExecStart'
+    line: ExecStart=/usr/sbin/openvpn --daemon ovpn-%i --status /run/openvpn/%i.status 10 --cd /etc/openvpn --script-security 2 --config /etc/openvpn/%i.ovpn --writepid /run/openvpn/%i.pid --askpass {{ openvpn_server_common_name }}_pk_pass.txt
+  notify: start openvpn service
+
+- name: start openvpn service
+  service:
+    name: "openvpn@{{ inventory_hostname }}.service"
+    state: started
+    daemon_reload: yes
+  with_items: "{{ openvpn_instances }}"

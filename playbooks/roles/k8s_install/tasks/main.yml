@@ -1,0 +1,93 @@
+- name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+  shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Loading br_netfilter kernel module
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Docker | package | Get official Docker APT key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: ~/docker.gpg
+
+- name: Docker | package | Add the key official Docker key
+  apt_key:
+    file: ~/docker.gpg
+    state: present
+
+- name: Docker | package | Get current distro
+  command: lsb_release -cs
+  register: current_distro_result
+  changed_when: false
+
+- name: Docker | package | Set current distro
+  set_fact:
+    current_distro: "{{ current_distro_result.stdout }}"
+
+- name: Docker | package | Add Docker repo
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ current_distro }} stable"
+    state: present
+    update_cache: yes
+
+- name: Docker | package | Install required packages from repo
+  package:
+    name: 
+      - docker-ce 
+      - docker-ce-cli
+      - containerd.io
+    state: present
+
+- name: Kubernetes | package | Get official Kubernetes APT key
+  get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: ~/k8s.gpg
+
+- name: Kubernetes | package | Add the key official Kubernetes key
+  apt_key:
+    file: ~/k8s.gpg
+    state: present
+
+- name: Kubernetes | package | Add Kubernetes repo
+  apt_repository:
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    update_cache: yes
+
+- name: Kubernetes | package | Install required packages from repo
+  package:
+    name: 
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+
+- name: Kubernetes | package | Mark/Hold the K8s packages
+  dpkg_selections:
+    name: kubelet
+    selection: hold
+
+- name: Kubernetes | package | Mark/Hold the K8s packages
+  dpkg_selections:
+    name: kubeadm
+    selection: hold
+
+- name: Kubernetes | package | Mark/Hold the K8s packages
+  dpkg_selections:
+    name: kubectl
+    selection: hold
+
+- name: Kubernetes | package | Start service
+  service:
+    name: "kubelet"
+    state: started
+    daemon_reload: yes
+

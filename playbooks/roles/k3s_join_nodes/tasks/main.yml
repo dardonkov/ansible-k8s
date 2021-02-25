@@ -1,0 +1,30 @@
+- name: k3s install  | Include saved vars from the control plane node
+  include_vars:
+    dir: "{{ inventory_dir }}/host_vars/"
+
+- name: k3s install | Remove idiotic iptables rules 1/2
+  lineinfile:
+    state: absent
+    path: /etc/iptables/rules.v4
+    line: "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
+
+- name: k3s install | Remove idiotic iptables rules 2/2
+  lineinfile:
+    state: absent
+    path: /etc/iptables/rules.v4
+    line: "-A FORWARD -j REJECT --reject-with icmp-host-prohibited"
+
+- name: k3s install | Reload iptables
+  command: "iptables-restore /etc/iptables/rules.v4"
+  ignore_errors: yes
+    
+- name: k3s install | Install k3s on worker nodes
+  shell: "curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['k8scontroller1']['ansible_tun_udp_1194']['ipv4']['address'] }}:6443 K3S_TOKEN={{ k3s_join_token }} INSTALL_K3S_EXEC='agent --flannel-iface  tun0' sh -"
+  register: installer_output
+
+- name: k3s install | Echo output
+  debug: 
+    msg: "{{ installer_output.stdout }}"
+
+
+    

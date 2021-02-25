@@ -1,0 +1,32 @@
+- name: microk8s setup | Check if swap file exists
+  stat:
+    path: "{{ swap_file }}"
+  register: swap_file_check
+
+- name: microk8s setup | Create swap file
+  command: fallocate -l {{ swap_space }} {{ swap_file }}
+  when: not swap_file_check.stat.exists
+
+- name: microk8s setup | Create swap space
+  command: dd if=/dev/zero of=/extraswap bs=1M count=512
+  when: not swap_file_check.stat.exists
+
+- name: microk8s setup | Set permissions on swap file
+  file:
+    path: "{{ swap_file }}"
+    mode: 0600
+  when: not swap_file_check.stat.exists
+
+- name: microk8s setup | Format swap file
+  command: mkswap {{ swap_file }}
+  when: not swap_file_check.stat.exists
+
+- name: microk8s setup | Add to fstab
+  lineinfile:
+    dest: /etc/fstab
+    regexp: "{{ swap_file }}"
+    line: "{{ swap_file }} none swap sw 0 0"
+  when: not swap_file_check.stat.exists
+
+- name: microk8s setup | Turn on swap
+  command: swapon -a

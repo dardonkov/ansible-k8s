@@ -1,0 +1,17 @@
+- name: Open VPN | Configuration | Copy .ovpn profiles and passwords to the clients
+  copy:
+    src: "{{ local_creds_folder }}/{{ inventory_hostname }}/"
+    dest: "{{ openvpn_path }}/"
+    owner: root
+    group: root
+    mode: '0600'
+  notify:
+    - edit openvpn service
+
+
+- name: OpenVPN | systemd | Enable services
+  service:
+    name: "openvpn@{{ inventory_hostname }}.service"
+    enabled: true
+  notify:
+    - edit openvpn service

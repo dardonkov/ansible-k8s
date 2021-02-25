@@ -1,0 +1,7 @@
+- name: Initialize control plane
+# ========================================================
+#  hosts: k8scluster
+  hosts: k8scontroller
+  become: true
+  roles:
+    - k8s_controlplane_init

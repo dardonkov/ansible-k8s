@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: my-service80
+subsets:
+  - addresses:
+      - ip: 192.169.1.65
+    ports:
+      - port: 80

@@ -1,0 +1,23 @@
+- name: Dissable swap
+  hosts: k8scluster
+  become: true
+  roles:
+    - remove_swap
+
+- name: Install microk8s and prerequisites 
+  hosts: k8scluster
+  become: true
+  roles:
+    - microk8s_install
+
+- name: Initialize cluster
+  hosts: k8scontroller
+  become: true
+  roles:
+    - microk8s_controller_init
+
+- name: Join nodes together
+  hosts: k8sworkers
+  become: true
+  roles:
+    - microk8s_join_nodes

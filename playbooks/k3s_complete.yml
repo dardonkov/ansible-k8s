@@ -1,0 +1,19 @@
+#Install microk8s and prerequisites 
+# ========================================================
+# - name: Create swap
+#   hosts: k8scluster
+#   become: true
+#   roles:
+#     - add_swap
+
+- name: Initialize controll plane node
+  hosts: k8scontroller
+  become: true
+  roles:
+    - k3s_controller_init
+
+- name: Join nodes together
+  hosts: k8sworkers
+  become: true
+  roles:
+    - k3s_join_nodes

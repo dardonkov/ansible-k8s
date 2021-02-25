@@ -1,0 +1,22 @@
+[k8scluster]
+k8shybrid-worker2 ansible_host=130.61.157.110 ansible_user=ubuntu #Oracle1
+k8shybrid-worker2-742224 ansible_host=130.61.243.176 ansible_user=ubuntu #Oracle2
+k8sHybrid-worker3 ansible_host=k8sHybrid-worker3.internal.insaneselfhosted.tk ansible_user=ubuntu #Local Celia
+k8sHybrid-worker4 ansible_host=k8sHybrid-worker4.internal.insaneselfhosted.tk ansible_user=ubuntu #Local Lilly
+k8scontroller1 ansible_host=13.49.244.248 ansible_user=ubuntu
+
+
+[k8sworkers]
+k8shybrid-worker2 ansible_host=130.61.157.110 ansible_user=ubuntu #Oracle1
+k8shybrid-worker2-742224 ansible_host=130.61.243.176 ansible_user=ubuntu #Oracle2
+k8sHybrid-worker3 ansible_host=k8sHybrid-worker3.internal.insaneselfhosted.tk ansible_user=ubuntu #Local Celia
+k8sHybrid-worker4 ansible_host=k8sHybrid-worker4.internal.insaneselfhosted.tk ansible_user=ubuntu #Local Lilly
+#k8stest.internal.insaneselfhosted.tk ansible_user=ubuntu
+
+[k8scontroller]
+k8scontroller1 ansible_host=13.49.244.248 ansible_user=ubuntu
+#k8stest.internal.insaneselfhosted.tk ansible_user=ubuntu
+
+
+[VPNserver]
+k8scontroller1 ansible_host=13.49.244.248 ansible_user=ubuntu

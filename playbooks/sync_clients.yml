@@ -1,0 +1,7 @@
+- name: Sync desired valid clients with OpenVPN's current PKI
+# ========================================================
+  hosts: k8scontroller
+  become: true
+  roles:
+    - sync_clients
+

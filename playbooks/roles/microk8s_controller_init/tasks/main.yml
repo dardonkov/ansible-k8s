@@ -1,0 +1,27 @@
+- name: microk8s setup | Initialize cluster
+  command: "microk8s add-node"
+  register: microk8s_join_command_output
+
+- name: microk8s setup | Get join command
+  set_fact:
+    microk8s_join_command: "{{ microk8s_join_command_output.stdout | regex_search('microk8s.*\n?') }}"
+
+- name: microk8s | Save join command
+  local_action: 
+    module: lineinfile
+    line: "microk8s_join_command: {{ microk8s_join_command }}"
+    path: "{{ inventory_dir }}/host_vars/{{inventory_hostname }}.yml"
+    create: true
+
+- name: microk8s setup | Get admin config
+  command: "microk8s config"
+  register: microk8s_config
+
+- name: microk8s setup | Create dir for admin config
+  local_action: file path="{{ local_creds_folder }}/{{inventory_hostname }}" state=directory
+
+
+- name: microk8s setup | Copy admin config
+  local_action: copy content="{{ microk8s_config.stdout }}" dest="{{ local_creds_folder }}/{{ inventory_hostname }}/config"
+    
+
